@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.23.1
 	github.com/charmbracelet/lipgloss v0.6.0
 	github.com/sashabaranov/go-gpt3 v0.0.0-20230106202239-cf013d3eb56a
+	golang.org/x/term v0.4.0
 )
 
 require (
@@ -23,6 +24,5 @@ require (
 	github.com/muesli/termenv v0.13.0 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/term v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 )

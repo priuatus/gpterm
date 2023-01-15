@@ -1,15 +1,14 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/priuatus/gpterm/internal/stdin"
 	gogpt "github.com/sashabaranov/go-gpt3"
 )
 
@@ -22,12 +21,12 @@ type completionMsg struct {
 }
 
 type model struct {
-	gpt *gogpt.Client
-	req gogpt.CompletionRequest
+	cmp completion
 	res *gogpt.CompletionResponse
 
 	spinner  spinner.Model
 	quitting bool
+	quiet    bool
 	err      error
 }
 
@@ -36,10 +35,9 @@ var quitKeys = key.NewBinding(
 	key.WithHelp("", "press q to quit"),
 )
 
-func initialModel(gpt *gogpt.Client, req gogpt.CompletionRequest) model {
+func initialModel(cmp completion) model {
 	m := model{
-		gpt: gpt,
-		req: req,
+		cmp: cmp,
 		spinner: spinner.New(spinner.WithSpinner(spinner.Meter),
 			spinner.WithStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("204")))),
 	}
@@ -47,19 +45,7 @@ func initialModel(gpt *gogpt.Client, req gogpt.CompletionRequest) model {
 }
 
 func (m model) createCompletion() tea.Msg {
-	stdIn, err := stdin.Read()
-	if err != nil && err != stdin.ErrEmpty {
-		return errMsg{err}
-	}
-	if stdIn != "" {
-		m.req.Prompt += stdIn
-	}
-	if m.req.Prompt == "" {
-		return errMsg{fmt.Errorf("missing prompt")}
-	}
-
-	ctx := context.Background()
-	resp, err := m.gpt.CreateCompletion(ctx, m.req)
+	resp, err := m.cmp.Create()
 	if err != nil {
 		return errMsg{err}
 	}
@@ -68,9 +54,11 @@ func (m model) createCompletion() tea.Msg {
 }
 
 func (m model) Init() tea.Cmd {
-	// Check for a terminal output
-	if isTerm() {
-		return tea.Batch(m.spinner.Tick, m.createCompletion)
+	// Check for a terminal output and run in interactive mode.
+	if !m.quiet {
+		if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
+			return tea.Batch(m.spinner.Tick, m.createCompletion)
+		}
 	}
 	return m.createCompletion
 }
@@ -101,16 +89,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	if m.err != nil {
-		return fmt.Sprintf("\n%s: %v\n\n", os.Args[0], m.err)
+		return fmt.Sprintf("%s: %v\n\n", os.Args[0], m.err)
 	}
 
 	if m.res != nil {
-		return fmt.Sprintf("%s\n\n", m.res.Choices[0].Text)
+		return fmt.Sprintf("\n%s\n", strings.TrimLeft(m.res.Choices[0].Text, "\n"))
 	}
 
-	str := fmt.Sprintf("\n %s thinking... %s\n\n", m.spinner.View(), quitKeys.Help().Desc)
+	var str string
+	if !m.quiet {
+		str = fmt.Sprintf("\n %s thinking... %s\n\n", m.spinner.View(), quitKeys.Help().Desc)
+	}
 	if m.quitting {
-		return str + "\n"
+		str += "\n"
 	}
 	return str
 }

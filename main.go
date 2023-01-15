@@ -18,7 +18,6 @@ var (
 )
 
 func main() {
-
 	cli := &CLI{}
 	ctx := kong.Parse(
 		cli,
