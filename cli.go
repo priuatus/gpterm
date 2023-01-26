@@ -32,7 +32,12 @@ func (c completion) Create() (resp gogpt.CompletionResponse, err error) {
 		return resp, fmt.Errorf("missing prompt")
 	}
 
-	return c.client.CreateCompletion(context.Background(), c.req)
+	resp, err = c.client.CreateCompletion(context.Background(), c.req)
+
+	if resp.Choices[0].FinishReason == "length" {
+		fmt.Fprintf(os.Stderr, "%s: MaxTokens reached consider increasing the limit\n", os.Args[0])
+	}
+	return resp, nil
 }
 
 type CLI struct {
@@ -52,8 +57,12 @@ func (t CLI) Run() error {
 			Temperature: t.Temp,
 			MaxTokens:   t.MaxTokens,
 			TopP:        1.0,
+			Echo:        true,
 			Prompt:      strings.Trim(fmt.Sprint(t.Prompt), "[]"),
 		},
+	}
+	if t.Quiet {
+		cmpltn.req.Echo = false
 	}
 
 	if term.IsTerminal(int(os.Stdout.Fd())) {
@@ -72,5 +81,6 @@ func (t CLI) Run() error {
 	if resp.Choices != nil {
 		fmt.Printf("%s", strings.TrimLeft(resp.Choices[0].Text, "\n"))
 	}
+
 	return nil
 }
