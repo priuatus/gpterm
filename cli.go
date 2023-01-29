@@ -35,9 +35,9 @@ func (c completion) Create() (resp gogpt.CompletionResponse, err error) {
 	resp, err = c.client.CreateCompletion(context.Background(), c.req)
 
 	if resp.Choices[0].FinishReason == "length" {
-		fmt.Fprintf(os.Stderr, "%s: MaxTokens reached consider increasing the limit\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "%s: --max-tokens %d reached consider increasing the limit\n", os.Args[0], resp.Usage.CompletionTokens)
 	}
-	return resp, nil
+	return resp, err
 }
 
 type CLI struct {
