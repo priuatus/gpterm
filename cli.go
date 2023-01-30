@@ -46,6 +46,7 @@ type CLI struct {
 	Temp      float32  `short:"t" default:"0.0" help:"Generation creativity. Higher is crazier."`
 	MaxTokens int      `short:"n" default:"100" help:"Max number of tokens to generate."`
 	Quiet     bool     `short:"q" default:"false" help:"Print only the model response."`
+	Stop      []string `short:"s" help:"Up to 4 sequences where the model will stop generating further. The returned text will not contain the stop sequence."`
 	Prompt    []string `arg:"" optional:"" help:"text prompt"`
 }
 
@@ -54,11 +55,12 @@ func (t CLI) Run() error {
 		client: gogpt.NewClient(t.APIKey),
 		req: gogpt.CompletionRequest{
 			Model:       t.Model,
-			Temperature: t.Temp,
+			Prompt:      strings.Join(t.Prompt, " "),
 			MaxTokens:   t.MaxTokens,
+			Temperature: t.Temp,
 			TopP:        1.0,
 			Echo:        true,
-			Prompt:      strings.Trim(fmt.Sprint(t.Prompt), "[]"),
+			Stop:        t.Stop,
 		},
 	}
 	if t.Quiet {
