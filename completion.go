@@ -20,6 +20,8 @@ type completionMsg struct {
 	res gogpt.CompletionResponse
 }
 
+type partialMsg struct{}
+
 type model struct {
 	cmp completion
 	res *gogpt.CompletionResponse
@@ -53,6 +55,10 @@ func (m model) createCompletion() tea.Msg {
 	return completionMsg{resp}
 }
 
+func (m model) streamCompletion() tea.Msg {
+	return partialMsg{}
+}
+
 func (m model) Init() tea.Cmd {
 	// Check for a terminal output and run in interactive mode.
 	if !m.quiet {
@@ -77,6 +83,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	case completionMsg:
 		m.res = &msg.res
+		if msg.res.IsStream() {
+			return m, m.streamCompletion
+		}
+		return m, tea.Quit
+	case partialMsg:
 		return m, tea.Quit
 	case spinner.TickMsg:
 		var cmd tea.Cmd
@@ -93,7 +104,9 @@ func (m model) View() string {
 	}
 
 	if m.res != nil {
-		return fmt.Sprintf("\n%s\n", strings.TrimLeft(m.res.Choices[0].Text, "\n"))
+		if !m.res.IsStream() {
+			return fmt.Sprintf("\n%s\n", strings.TrimLeft(m.res.Choices[0].Text, "\n"))
+		}
 	}
 
 	var str string
