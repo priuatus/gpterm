@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -45,12 +46,12 @@ func initialModel(cmp completion) model {
 }
 
 func (m model) createCompletion() tea.Msg {
-	resp, err := m.cmp.Create()
+	resp, err := m.cmp.Create(context.Background())
 	if err != nil {
 		return errMsg{err}
 	}
 
-	return completionMsg{resp}
+	return completionMsg{resp.CompletionResponse}
 }
 
 func (m model) Init() tea.Cmd {

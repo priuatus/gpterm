@@ -3,3 +3,4 @@ dist/
 .vscode/
 go.work
 go.work.sum
+gpterm
