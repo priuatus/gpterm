@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/bubbles v0.15.0
 	github.com/charmbracelet/bubbletea v0.23.2
 	github.com/charmbracelet/lipgloss v0.6.0
-	github.com/sashabaranov/go-gpt3 v1.2.1
+	github.com/sashabaranov/go-gpt3 v1.3.1
 	golang.org/x/term v0.5.0
 )
 
