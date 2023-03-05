@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	gogpt "github.com/sashabaranov/go-gpt3"
+	gogpt "github.com/sashabaranov/go-openai"
 )
 
 type errMsg struct{ err error }

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/term"
 
 	tea "github.com/charmbracelet/bubbletea"
-	gogpt "github.com/sashabaranov/go-gpt3"
+	gogpt "github.com/sashabaranov/go-openai"
 )
 
 type completionResponse struct {
