@@ -26,6 +26,31 @@ type completion struct {
 	req    gogpt.CompletionRequest
 }
 
+func (c *completion) addPromptString(prompt string) {
+	switch c.req.Prompt.(type) {
+	case string:
+		c.req.Prompt = c.req.Prompt.(string) + prompt
+	case []string:
+		c.req.Prompt = append(c.req.Prompt.([]string), prompt)
+	}
+}
+
+func (c *completion) IsEmptyPrompt() bool {
+	switch c.req.Prompt.(type) {
+	case string:
+		return c.req.Prompt.(string) == ""
+	case []string:
+		return len(c.req.Prompt.([]string)) == 0
+	}
+	return true
+}
+
+func checkPromptType(prompt any) bool {
+	_, isString := prompt.(string)
+	_, isStringSlice := prompt.([]string)
+	return isString || isStringSlice
+}
+
 func (c completion) Create(ctx context.Context) (resp completionResponse, err error) {
 	var stdIn string
 	stdIn, err = stdin.Read()
@@ -35,8 +60,8 @@ func (c completion) Create(ctx context.Context) (resp completionResponse, err er
 	if err == stdin.ErrEmpty {
 		stdIn = ""
 	}
-	c.req.Prompt += stdIn
-	if c.req.Prompt == "" {
+	c.addPromptString(stdIn)
+	if c.IsEmptyPrompt() {
 		return resp, fmt.Errorf("missing prompt")
 	}
 	if c.req.Stream {
