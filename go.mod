@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.23.2
 	github.com/charmbracelet/lipgloss v0.7.1
 	github.com/sashabaranov/go-openai v1.8.0
-	golang.org/x/term v0.7.0
+	golang.org/x/term v0.8.0
 )
 
 require (
@@ -24,6 +24,6 @@ require (
 	github.com/muesli/termenv v0.15.1 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 )
